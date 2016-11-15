@@ -21,6 +21,9 @@ import tabulate
 import argparse
 from timeit import default_timer as timer 
 
+def RHS(x,y,z):
+	return [ [ [-exp(-(x[i]-0.25)**2 - (y[j]-0.6)**2 - z[k]**2) for i in range(n+2)] for j in range(n+2)] for k in range(n+2)]
+
 #set empty array to hold iteration counts for different mesh spacings
 counts = np.zeros(3)
 #initialize mesh spacing number, to access proper counts row
@@ -54,7 +57,7 @@ for h in mesh_spacings:
 	w = 2/(1+sin(pi*h))
 
 	#sample f = -e^(-(x-.25)^2 - (y-.6)^2) at grid points
-	f = [ [ [-exp(-(x[i]-0.25)**2 - (y[j]-0.6)**2 - z[k]**2) for i in range(n+2)] for j in range(n+2)] for k in range(n+2)]
+	f = RHS(x,y,z)
 	
 
 	#initialize method finished flags and method iteration counts to 0
