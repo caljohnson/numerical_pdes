@@ -22,7 +22,7 @@ import argparse
 from timeit import default_timer as timer 
 
 def RHS(x,y,z):
-	return [ [ [-exp(-(x[i]-0.25)**2 - (y[j]-0.6)**2 - z[k]**2) for i in range(n+2)] for j in range(n+2)] for k in range(n+2)]
+	return -exp(-(x-0.25)**2 - (y-0.6)**2 - z**2)
 
 #set empty array to hold iteration counts for different mesh spacings
 counts = np.zeros(3)
@@ -55,9 +55,6 @@ for h in mesh_spacings:
 
 	#set optimum w for SOR
 	w = 2/(1+sin(pi*h))
-
-	#sample f = -e^(-(x-.25)^2 - (y-.6)^2) at grid points
-	f = RHS(x,y,z)
 	
 
 	#initialize method finished flags and method iteration counts to 0
@@ -74,7 +71,7 @@ for h in mesh_spacings:
 		for k in range(1,n+1):
 			for j in range(1,n+1):
 				for i in range(1,n+1):
-					u_SOR[i][j][k] = (w/6)*(u_SOR[i-1][j][k] +u_SOR[i][j-1][k] + u_SOR[i][j][k-1]+u_SOR[i+1][j][k] + u_SOR[i][j+1][k]+u_SOR[i][j][k+1] - (h**2)*f[i][j][k]) + (1-w)*u_SOR[i][j][k]
+					u_SOR[i][j][k] = (w/6)*(u_SOR[i-1][j][k] +u_SOR[i][j-1][k] + u_SOR[i][j][k-1]+u_SOR[i+1][j][k] + u_SOR[i][j+1][k]+u_SOR[i][j][k+1] - (h**2)*f(x[i],y[j],z[k])) + (1-w)*u_SOR[i][j][k]
 
 		#check whether these methods have relative error within the tolerance THIS IS A BAD ERROR TO LOOK AT	
 		if np.amax(np.abs(u_SOR-old_SOR)) <= tol*np.amax(np.abs(old_SOR)) and flag_SOR:
