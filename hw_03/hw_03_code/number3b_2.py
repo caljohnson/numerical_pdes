@@ -11,7 +11,7 @@
 from __future__ import division
 
 import numpy as np
-from math import exp, sin, pi
+from np import exp, sin, pi
 
 from tqdm import tqdm
 import matplotlib.pyplot as plt
