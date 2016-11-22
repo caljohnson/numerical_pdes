@@ -16,7 +16,7 @@ def full_weighting_restriction(u, h):
 	u_f = u +0
 	h2 = 2*h
 	n2 = int(1/h2)-1
-	u_c = np.zeros((n2+2, n2+2), dtype='int64')
+	u_c = np.zeros((n2+2, n2+2))
 
 	#loop over coarse mesh, holding boundary entries zero as per Dirichlet BC
 	for i in range(1,n2+1):

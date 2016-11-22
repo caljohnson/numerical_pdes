@@ -63,12 +63,12 @@ def V_cycle(u, f, h):
 	return GSRB.GS_RB_smoother(u, f, h, 1)
 
 def main():
-	h = 2**(-2)
+	h = 2**(-8)
 	n = int(1/h - 1)
 	u = np.zeros((n+2, n+2))
 	f = RHS_function_sampled(h)
 
-	tol = 10**(-4)
+	tol = 10**(-7)
 
 	#use multigrid algorithm
 	itcount = 0

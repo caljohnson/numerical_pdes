@@ -20,8 +20,8 @@ import scipy.sparse.linalg
 def make_sparse_Laplacian(h):
 	#set sparse matrix A, the discrete Laplacian
 	N = int(1/h) -1
-	offdiag = (1/(h**2))*np.ones(N)
-	diag = np.ones(N)*(-4/(h**2))
+	offdiag = (1/(h**2))*np.ones(N**2)
+	diag = np.ones(N**2)*(-4/(h**2))
 	data = np.vstack((offdiag, offdiag, diag, offdiag, offdiag))
 	A = sparse.dia_matrix((data, [-N,-1, 0,1,N]), shape = (N**2,N**2))
 	return scipy.sparse.csr_matrix(A)
