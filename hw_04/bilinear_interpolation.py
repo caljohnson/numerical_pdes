@@ -12,14 +12,6 @@ from __future__ import division
 import numpy as np
 from math import exp, sin, pi
 
-from tqdm import tqdm
-import matplotlib.pyplot as plt
-import scipy.sparse as sparse
-import scipy.sparse.linalg
-import tabulate
-import argparse
-from timeit import default_timer as timer 
-
 def bilinear_interpolation(u, h):
 	u_c = u +0
 	n = int(1/h)-1
@@ -44,16 +36,3 @@ def bilinear_interpolation(u, h):
 			u_f[2*i-1][2*j-1] += u_c[i][j]/4
 			
 	return u_f
-
-# def test():
-# 	h = 2**(-4)
-# 	n = int(1/h)-1
-# 	u = np.zeros((n+2, n+2))
-# 	for i in range(1,n+1):
-# 		for j in range(1,n+1):
-# 			u[i][j] = 1
-# 	u2 = bilinear_interpolation(u,h)
-# 	print u
-# 	print u2
-
-# test()	

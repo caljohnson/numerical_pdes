@@ -74,6 +74,7 @@ def main():
 	f = RHS_function_sampled(h)
 
 	tol = 10**(-7)
+
 	#use multigrid algorithm
 	itcount = 0
 	while True:

@@ -29,17 +29,6 @@ def make_sparse_Laplacian(h):
 	A = sparse.dia_matrix((data, [-N,-1, 0,1,N]), shape = (N**2,N**2))
 	return scipy.sparse.csr_matrix(A)
 
-def RHS_function_sampled(h):
-	n = int(1/h)-1
-	#set x,y grid point vectors (n x 1)
-	x = [i*h for i in range(n+2)]
-	y = [j*h for j in range(n+2)]
-
-	f = [[-exp(-(x[i]-0.25)**2 - (y[j]-0.6)**2) for i in range(1,n+1)] for j in range(1,n+1)]
-	
-	#return flattened f, for dimensions to work with f-Au
-	return np.asarray(f).flatten()
-
 def compute_residual(u, f, h):
 	#remove Dirichlet BC's from u to work with Au
 	#and flatten the matrix into a vector for Au multiplication
@@ -55,16 +44,4 @@ def compute_residual(u, f, h):
 	for i in range(1,n+1):
 		for j in range(1,n+1):
 			residual[i][j] = flat_residual[n*(i-1) + (j-1)]
-	return residual		
-
-# def test():
-# 	h = 2**(-2)
-# 	n = int(1/h)-1
-# 	u = np.zeros((n+2, n+2))
-# 	for i in range(1,n+1):
-# 		for j in range(1,n+1):
-# 			u[i][j] = 1
-# 	residual = compute_residual(u, h)
-# 	print residual		
-
-# test()		
+	return residual			
