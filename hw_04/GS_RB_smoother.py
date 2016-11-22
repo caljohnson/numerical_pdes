@@ -19,20 +19,13 @@ import tabulate
 import argparse
 from timeit import default_timer as timer 
 
-def RHS_function(x, y):
-	return -exp(-(x-0.25)**2 - (y-0.6)**2) 
-
-def GS_RB_smoother(u, h, steps):
+def GS_RB_smoother(u, f, h, steps):
 
 	#start timer
 	# start = timer()
 
 	#set number of grid points in each row/column
 	n = int(1/h - 1)
-
-	#set x,y grid point vectors (n x 1)
-	x = [i*h for i in range(n+2)]
-	y = [j*h for j in range(n+2)]
 	
 	#set empty Jacobi, GS, and SOR solution matrices
 	u_RB = u+0
@@ -51,10 +44,10 @@ def GS_RB_smoother(u, h, steps):
 		for j in range(1,int((n+1)/2)):
 			#loop red (even entried points)
 			for i in range(1,int((n+1)/2)):
-				u_RB[2*i][2*j] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*RHS_function(x[i],y[j]))
+				u_RB[2*i][2*j] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*f[i][j])
 			#loop black (odd entried points)
 			for i in range(1,int((n+1)/2)):
-				u_RB[2*i-1][2*j-1] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*RHS_function(x[i],y[j]))
+				u_RB[2*i-1][2*j-1] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*f[i][j])
 
 		# #check whether these methods have relative error within the tolerance
 		# if np.amax(np.abs(u_RB-old_RB)) <=  tol*np.amax(np.abs(old_RB)):

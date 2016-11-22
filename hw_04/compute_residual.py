@@ -40,21 +40,21 @@ def RHS_function_sampled(h):
 	#return flattened f, for dimensions to work with f-Au
 	return np.asarray(f).flatten()
 
-def compute_residual(u, h):
+def compute_residual(u, f, h):
 	#remove Dirichlet BC's from u to work with Au
 	#and flatten the matrix into a vector for Au multiplication
 	u_inner = u[1:-1, 1:-1].flatten()
+	f_inner = f[1:-1, 1:-1].flatten()
 	A = make_sparse_Laplacian(h)
-	f = RHS_function_sampled(h)
 	#obtain flattened residual
-	flat_residual = f - A.dot(u_inner) 
+	flat_residual = f_inner - A.dot(u_inner) 
 
 	#reformat residual into a matrix
 	n = int(1/h)-1
 	residual = np.zeros((n+2, n+2))
 	for i in range(1,n+1):
 		for j in range(1,n+1):
-			residual[i][j] = flat_residual[n*(j-1) + (i-1)]
+			residual[i][j] = flat_residual[n*(i-1) + (j-1)]
 	return residual		
 
 # def test():
