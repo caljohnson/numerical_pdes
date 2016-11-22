@@ -18,6 +18,7 @@ import scipy.sparse.linalg
 import tabulate
 import argparse
 from timeit import default_timer as timer 
+from time import clock
 import GS_RB_smoother as GSRB
 import full_weighting_restriction
 import bilinear_interpolation
@@ -39,7 +40,7 @@ def RHS_function_sampled(h):
 def V_cycle(u, f, h):
 	#presmooth v1 times
 	u = GSRB.GS_RB_smoother(u,f, h,1)
-	
+
 	#compute residual
 	res = compute_residual.compute_residual(u, f, h)
 
@@ -84,4 +85,5 @@ def main():
 
 	print itcount
 
-main()
+if __name__ == "__main__":
+	main() 

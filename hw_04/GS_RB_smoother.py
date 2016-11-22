@@ -10,6 +10,7 @@ from __future__ import division
 
 import numpy as np
 from math import exp, sin, pi
+from time import clock
 
 def GS_RB_smoother(u, f, h, steps):
 
@@ -19,27 +20,22 @@ def GS_RB_smoother(u, f, h, steps):
 	#set empty Jacobi, GS, and SOR solution matrices
 	u_RB = u+0
 	old_RB = u + 0
-	
-	#initialize method finished flag to 1 and method iteration count to 0
-	flag = 1
-	itcount = 0
 
 	#begin iterative scheme
 	for k in range(steps):
-
-		#update iteration count
-		itcount+=1
 
 		#loop red (even entried points)
 		for i in range(1,n+1):
 			for j in range(1,n+1):
 				if (i+j)%2==0:
-					u_RB[i][j] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*f[i][j])
+					u_RB[i][j] = (1/4)*(old_RB[i-1][j]+old_RB[i][j-1]+old_RB[i+1][j] + old_RB[i][j+1] - (h**2)*f[i][j])
+		#update old_RB
+		old_RB = u_RB + 0
 		#loop black (odd entried points)
 		for i in range(1,n+1):
 			for j in range(1,n+1):
 				if (i+j)%2!=0:
-					u_RB[i][j] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*f[i][j])
+					u_RB[i][j] = (1/4)*(old_RB[i-1][j]+old_RB[i][j-1]+old_RB[i+1][j] + old_RB[i][j+1] - (h**2)*f[i][j])
 
 		#remember (+0 is so that the data is copied, not the pointer)
 		old_RB = u_RB+0
