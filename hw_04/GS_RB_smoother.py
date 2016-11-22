@@ -30,13 +30,16 @@ def GS_RB_smoother(u, f, h, steps):
 		#update iteration count
 		itcount+=1
 
-		for j in range(1,int((n+1)/2)):
-			#loop red (even entried points)
-			for i in range(1,int((n+1)/2)):
-				u_RB[2*i][2*j] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*f[i][j])
-			#loop black (odd entried points)
-			for i in range(1,int((n+1)/2)):
-				u_RB[2*i-1][2*j-1] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*f[i][j])
+		#loop red (even entried points)
+		for i in range(1,n+1):
+			for j in range(1,n+1):
+				if (i+j)%2==0:
+					u_RB[i][j] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*f[i][j])
+		#loop black (odd entried points)
+		for i in range(1,n+1):
+			for j in range(1,n+1):
+				if (i+j)%2!=0:
+					u_RB[i][j] = (1/4)*(u_RB[i-1][j]+u_RB[i][j-1]+u_RB[i+1][j] + u_RB[i][j+1] - (h**2)*f[i][j])
 
 		#remember (+0 is so that the data is copied, not the pointer)
 		old_RB = u_RB+0

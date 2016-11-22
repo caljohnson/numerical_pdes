@@ -16,9 +16,6 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import scipy.sparse as sparse
 import scipy.sparse.linalg
-import tabulate
-import argparse
-from timeit import default_timer as timer 
 
 def make_sparse_Laplacian(h):
 	#set sparse matrix A, the discrete Laplacian
@@ -35,6 +32,7 @@ def compute_residual(u, f, h):
 	u_inner = u[1:-1, 1:-1].flatten()
 	f_inner = f[1:-1, 1:-1].flatten()
 	A = make_sparse_Laplacian(h)
+
 	#obtain flattened residual
 	flat_residual = f_inner - A.dot(u_inner) 
 

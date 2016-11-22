@@ -39,27 +39,22 @@ def RHS_function_sampled(h):
 def V_cycle(u, f, h):
 	#presmooth v1 times
 	u = GSRB.GS_RB_smoother(u,f, h,1)
-	# print u
-
+	
 	#compute residual
 	res = compute_residual.compute_residual(u, f, h)
-	# print res
 
 	#restrict residual
 	res2 = full_weighting_restriction.full_weighting_restriction(res, h)
-	# print res2
 
 	#solve for coarse grid error, check grid level to decide whether to solve or be recursive
 	if h == 2**(-2):
 		error = direct_solve.trivial_direct_solve(res2, 2*h)
-		# print error
 	else:
 		error = np.zeros((int(1/(2*h)+1), int(1/(2*h)+1)))
 		error = V_cycle(error, res2, 2*h)	
 
 	#interpolate error
 	error2 = bilinear_interpolation.bilinear_interpolation(error, 2*h)
-	# print error2
 
 	#correct (add error back in)
 	u = u+error2
@@ -68,12 +63,12 @@ def V_cycle(u, f, h):
 	return GSRB.GS_RB_smoother(u, f, h, 1)
 
 def main():
-	h = 2**(-8)
+	h = 2**(-2)
 	n = int(1/h - 1)
 	u = np.zeros((n+2, n+2))
 	f = RHS_function_sampled(h)
 
-	tol = 10**(-7)
+	tol = 10**(-4)
 
 	#use multigrid algorithm
 	itcount = 0
