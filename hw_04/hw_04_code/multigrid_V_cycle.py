@@ -37,9 +37,9 @@ def RHS_function_sampled(h):
 			f[i][j] = -exp(-(x[i]-0.25)**2 - (y[j]-0.6)**2)
 	return f		
 	
-def V_cycle(u, f, h):
+def V_cycle(u, f, h, v1, v2):
 	#presmooth v1 times
-	u = GSRB.GS_RB_smoother(u,f, h,1)
+	u = GSRB.GS_RB_smoother(u,f, h, v1)
 
 	#compute residual
 	res = compute_residual.compute_residual(u, f, h)
@@ -52,7 +52,7 @@ def V_cycle(u, f, h):
 		error = direct_solve.trivial_direct_solve(res2, 2*h)
 	else:
 		error = np.zeros((int(1/(2*h)+1), int(1/(2*h)+1)))
-		error = V_cycle(error, res2, 2*h)	
+		error = V_cycle(error, res2, 2*h, v1, v2)	
 
 	#interpolate error
 	error2 = bilinear_interpolation.bilinear_interpolation(error, 2*h)
@@ -61,7 +61,7 @@ def V_cycle(u, f, h):
 	u = u+error2
 
 	#post-smooth v2 times
-	return GSRB.GS_RB_smoother(u, f, h, 1)
+	return GSRB.GS_RB_smoother(u, f, h, v2)
 
 def main():
 	h = 2**(-8)
@@ -77,7 +77,7 @@ def main():
 		u_old = u + 0
 		itcount += 1
 		#use a V-cycle iteration
-		u=V_cycle(u_old, f, h)
+		u=V_cycle(u_old, f, h, 1, 1)
 
 		#check convergence using relative tolerance
 		if np.amax(np.abs(u-u_old)) < tol*np.amax(np.abs(u_old)):

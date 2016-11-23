@@ -4,7 +4,7 @@
 #Bilinear interpolation operation for
 #full Multigrid V-cycle with
 #full-weighting, bilinear interpol, GS-RB smoothing 
-#to find soluton to Laplacian u = -e^(-(x-.25)^2 - (y-.6)^2)
+#to find soluton to Poisson eqn.
 #with homogeneous Dirichlet BC's
 
 from __future__ import division
