@@ -10,7 +10,7 @@
 from __future__ import division
 
 import numpy as np
-from math import exp
+from np import exp
 
 import matplotlib.pyplot as plt
 import scipy.sparse as sparse
@@ -21,7 +21,8 @@ from timeit import default_timer as timer
 #mesh spacings
 mesh_spacings = [2**(-5), 2**(-6), 2**(-7)]
 
-
+def RHS(x,y):
+	return -exp(-(x-0.25)**2 - (y-0.6)**2)
 
 #Loop for refinement study
 for h in mesh_spacings:
@@ -35,7 +36,7 @@ for h in mesh_spacings:
 	x = [i*h for i in range(N+2)]
 	y = [j*h for j in range(N+2)]
 	#set RHS of PDE, Au(x_i,y_j) = f(x_i,y_j) = b
-	f = [ [-exp(-(x[i]-0.25)**2 - (y[j]-0.6)**2) for i in range(1,N+1)] for j in range(1,N+1)] 
+	f = [ [RHS(x[i],y[j]) for i in range(1,N+1)] for j in range(1,N+1)] 
 	b = np.asarray(f)
 	b= b.flatten()
 
