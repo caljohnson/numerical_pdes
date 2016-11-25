@@ -21,23 +21,31 @@ def GS_RB_smoother(u, f, h, steps):
 	u_RB = u+0
 	old_RB = u + 0
 
+	#separate red, black indices into two lists
+	reds = []
+	blacks = []
+	for i in range(1,n+1):
+		for j in range(1,n+1):
+			if (i+j)%2==0:
+				reds.append((i,j))
+			else:
+				blacks.append((i,j))
+
 	#begin iterative scheme
 	for k in range(steps):
 
-		#loop red (even entried points)
-		for i in range(1,n+1):
-			for j in range(1,n+1):
-				if (i+j)%2==0:
-					u_RB[i][j] = (1/4)*(old_RB[i-1][j]+old_RB[i][j-1]+old_RB[i+1][j] + old_RB[i][j+1] - (h**2)*f[i][j])
+		#loop red 
+		for (i,j) in reds:
+			u_RB[i][j] = (1/4)*(old_RB[i-1][j]+old_RB[i][j-1]+old_RB[i+1][j] + old_RB[i][j+1] - (h**2)*f[i][j])
+		
 		#update old_RB
 		old_RB = u_RB + 0
-		#loop black (odd entried points)
-		for i in range(1,n+1):
-			for j in range(1,n+1):
-				if (i+j)%2!=0:
-					u_RB[i][j] = (1/4)*(old_RB[i-1][j]+old_RB[i][j-1]+old_RB[i+1][j] + old_RB[i][j+1] - (h**2)*f[i][j])
+		
+		#loop black 
+		for (i,j) in blacks:
+			u_RB[i][j] = (1/4)*(old_RB[i-1][j]+old_RB[i][j-1]+old_RB[i+1][j] + old_RB[i][j+1] - (h**2)*f[i][j])
 
-		#remember (+0 is so that the data is copied, not the pointer)
+		#update old_RB (+0 is so that the data is copied, not the pointer)
 		old_RB = u_RB+0
 
 	return u_RB

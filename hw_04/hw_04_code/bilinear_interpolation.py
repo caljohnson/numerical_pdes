@@ -12,8 +12,7 @@ from __future__ import division
 import numpy as np
 from math import exp, sin, pi
 
-def bilinear_interpolation(u, h):
-	u_c = u +0
+def bilinear_interpolation(u_c, h):
 	n = int(1/h)-1
 	h2 = h/2
 	n2 = int(1/h2)-1
