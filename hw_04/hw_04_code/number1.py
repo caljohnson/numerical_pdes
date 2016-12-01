@@ -13,17 +13,13 @@ import numpy as np
 from math import exp, sin, pi
 
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-import scipy.sparse as sparse
-import scipy.sparse.linalg
 import tabulate
 import copy
 import argparse
-from timeit import default_timer as timer 
 from time import clock
 from multigrid_V_cycle import V_cycle
-from compute_residual import compute_residual, make_sparse_Laplacian, apply_Laplacian_nomatrix
-from GS_RB_smoother import GS_RB_smoother, GS_lex_smoother
+from compute_residual import compute_residual, get_Laplacian, apply_Laplacian_nomatrix
+from GS_RB_smoother import GS_RB_smoother
 
 def RHS_function_sampled(h):
 	n = int(1/h)-1
@@ -70,74 +66,71 @@ def PARSE_ARGS():
 def main():
 	#create grid spacings data
 	grid_spacings = [2**(-5), 2**(-6), 2**(-7), 2**(-8), 2**(-9)]
-	# grid_spacings = [2**(-2)]
+
+	#make sparse Laplacians for later computation
+	Laplacians = []
+	for i in range(2,10):
+		Laplacians.append(get_Laplacian(2**(-i)))
+	
 	#create iteration count holder and runtimes holder
 	itcounts = []
 	times = []
 
+	#get command line input, for test case
 	args = PARSE_ARGS()
+
+	#set tolerance for stopping criterion
 	tol = 10**(-10)
 
+	#in case we're running the multigrid code test on known problem
 	if args.test:
 		errors=[]
 		grid_spacings = [2**(-8)]
 
 	#loop over different grid spacings
 	for h in tqdm(grid_spacings):
+		#time multigrid code for grid spacing h
 		toc = clock()
+
+		#set up initial solution guess
 		n = int(1/h - 1)
 		u = np.zeros((n+2, n+2), dtype=float)
-		# u = np.random.rand(n,n)
-		# u= np.pad(u, ((1,1),(1,1)), mode='constant')
-		# print np.amax(np.abs(u))
+	
+		#if in test, set known solution and get RHS
 		if args.test:
 			SOL = np.random.rand(n,n)
 			SOL = np.pad(SOL, ((1,1),(1,1)), mode='constant')
-			f = apply_Laplacian_nomatrix(SOL,h)
+			f = apply_Laplacian_nomatrix(SOL,h, Laplacians[int(-2-np.log2(h))])
 
-			# print f, SOL
-			# f = np.random.rand(n,n)
-			# f = np.pad(f, ((1,1),(1,1)), mode='constant')
-			# f = test_function(h)
-			# u_soln = test_solution(h)
-			# soln_res = compute_residual(u_soln, f, h)
+		#if not in test, set RHS as in problem statement
 		else:
 			f = RHS_function_sampled(h)	
-		# res = compute_residual(u,f,h)
-		# print "res = ", res
 
-		# u = list(GS_RB_smoother(list(SOL),f,h,1))
 		#use multigrid algorithm
 		itcount = 0
 		while True:
-			# res_old = res)
 			itcount += 1
 			print itcount
 			#use a V-cycle iteration
-			u=V_cycle(u, f, h, 1,1)
-			# u = GS_RB_smoother(u,f,h,1)
-			# print u-SOL
-			# u = list(GS_RB_smoother(list(u), f, h, 1))
-			#print 'v cycle end' 
-			res = compute_residual(u, f, h)
-			# print "res = ", np.amax(np.abs(res))
-			# print " error = " , np.amax(np.abs(SOL-u))
-			# print "ratio of residuals = ", np.amax(np.abs(res))/np.amax(np.abs(res_old))
-			#check convergence using relative tolerance
-			# if np.amax(np.abs(u-u_old)) < tol*np.amax(np.abs(u_old)):
-			# 	break
+			u=V_cycle(u, f, h, 2,1, Laplacians)
+
+			#compute residual of solution
+			res = compute_residual(u, f, h, Laplacians[int(-2-np.log2(h))])
+
+			#check convergence using norm of residual relative to norm of RHS function
 			if np.amax(np.abs(res)) < tol*np.amax(np.abs(f)):
 				break
 
+		#stop timer, collect time and iteration count into data table
 		tic = clock()
 		itcounts.append(itcount)
 		times.append(tic-toc)
+
+		#if in test case, collect error for table
 		if args.test:
-			res = compute_residual(u,f,h)
-			print "final residual", np.amax(np.abs(res))
 			errors.append(np.amax(np.abs(u-SOL))/np.amax(np.abs(SOL)))
 
-	#create table of output data
+	#create table of output data for test case and for problem solution
 	if args.test:
 		test_table = [[grid_spacings[i], itcounts[i], times[i], errors[i]] for i in range(np.size(grid_spacings)) ]
 		print tabulate.tabulate(test_table, headers = ["grid spacing h", "iteration count", "run time (seconds)", "max errors"], tablefmt="latex")
