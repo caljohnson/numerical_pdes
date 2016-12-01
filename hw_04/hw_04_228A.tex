@@ -87,36 +87,71 @@ $$\Delta u = -\exp\qty( - (x-0.25)^2 - (y-0.6)^2)$$
 on the unit square $(0, 1) \times (0, 1)$ with homogeneous Dirichlet boundary conditionss for different grid spacings. How many steps of pre and postsmoothing did you use? What tolerance did you use? How many cycles did it take to converge? Compare the amount of work needed to reach convergence with your solvers from Homework 3 taking into account how much work is involved in a V-cycle.
 \end{myprob}
 
-For the given problem, I ran my multigrid V-cycle code with stopping criterion relative tolerance of $10^{-7}$. The results are tabulated as follows. \\
-{
-\centering
+For the given problem, I ran my multigrid V-cycle code with the stopping criterion
+max-norm of the residual relative to the max-norm of the RHS function, with a tolerance of $10^{-10}$. Using my analysis from 2, I found that (1,1), (2,1), and (2,2) were top contenders for optimal pre-smoothing, post-smoothing step numbers, and the fastest results were obtained for 2 pre-smoothing steps and 1 post-smoothing step. The results show that iteration count for the multigrid algorithm is grid-independent, and are tabulated as follows. \\
+For $(\nu_1, \nu_2) = (1,1)$,  \\
+\begin{center}
 \begin{tabular}{||c|c|c||}
 \hline \hline
    grid spacing $h$ &   iteration count &   run time (seconds) \\
 \hline \hline
-       $2^{-5}$    &                16 &             0.703004 \\
-       $2^{-6}$    &                16 &             2.82203  \\
-       $2^{-7}$   &                15 &            10.7262   \\
-       $2^{-8}$  &                14 &            40.7734   \\
+       $2^{-5}$    &                12 &             0.499733 \\
+       $2^{-6}$   &                12 &             1.848    \\
+       $2^{-7}$  &                12 &             7.19456  \\
+       $2^{-8}$ &                12 &            28.9125   \\
+       $2^{-9}$ & 12 & 126.997 \\
 \hline \hline
 \end{tabular}
-}\\
+\end{center}
 
-Testing my code on the thing from p2, I got the following data: \\
-{
-\centering
-\begin{tabular}{||c|c|c|c||}
+\noindent For $(\nu_1, \nu_2) = (2,1)$,  \\
+\begin{center}
+\begin{tabular}{||c|c|c||}
 \hline \hline
-   grid spacing h &   iteration count &   run time (seconds) &   max. relative errors \\
+   grid spacing $h$ &   iteration count &   run time (seconds) \\
 \hline \hline
-       0.03125    &                15 &             0.661239 &    0.130899  \\
-       0.015625   &                15 &             2.63253  &    0.0809393 \\
-       0.0078125  &                15 &            10.6599   &    0.0456318 \\
-       0.00390625 &                14 &            40.5742   &    0.0248325 \\
+       $2^{-5}$   &                10 &             0.440417 \\
+       $2^{-6}$   &                10 &             1.7189   \\
+       $2^{-7}$  &                10 &             7.17908  \\
+       $2^{-8}$ &                10 &            29.8294   \\
+       $2^{-9}$ & 10 & 124.565 \\
 \hline \hline
 \end{tabular}
-}\\
-The errors are not looking too good.
+\end{center}
+
+\noindent For $(\nu_1, \nu_2) = (2,2)$,  \\
+\begin{center}
+\begin{tabular}{||c|c|c||}
+\hline \hline
+   grid spacing $h$ &   iteration count &   run time (seconds) \\
+\hline \hline
+       $2^{-5}$    &                 9 &             0.443553 \\
+       $2^{-6}$   &                 9 &             1.88315  \\
+       $2^{-7}$ &                 9 &             7.48722  \\
+       $2^{-8}$ &                 9 &            29.7502   \\
+       $2^{-9}$ & 9 & 127.246 \\
+\hline \hline
+\end{tabular}
+\end{center}
+
+The choice of $(\nu_1, \nu_2) = (2,1)$ performs slightly better than $(1,1)$ and $(2,2)$ on most grid sizes.  Compared to the solvers from homework 3, i.e., the Jacobi, GS-lex, and SOR iterative methods, this program takes significantly fewer total iterations, and considerably less work overall. since each iteration consists of 8-21 GS-RB iterations, and 4-7 restrictions, interpolations, and residual calculations (comparable work to 1 GS-RB iteration each). Thus each iteration of my V-cycle is approximately equivalent to 20-42 GS iterations in work, so the overall work of my V-cycle multigrid code is comparable to about 200-400 iterations of GS.  This is comparable work to the SOR method from homework 3, and much better than the Jacobi-GS methods.  While the iteration counts are grid-independent for the multigrid method, the overall work is still comparable to SOR.
+
+% Testing my code on the thing from p2, I got the following data: \\
+% {
+% \centering
+% \begin{tabular}{||c|c|c|c||}
+% \hline \hline
+%    grid spacing h &   iteration count &   run time (seconds) &   max. relative errors \\
+% \hline \hline
+%        0.03125    &                12 &             0.652859 &    0.133644  \\
+%        0.015625   &                11 &             2.45886  &    0.0836667 \\
+%        0.0078125  &                11 &             9.94217  &    0.0484251 \\
+%        0.00390625 &                10 &            36.6669   &    0.0267205 \\
+% \hline \hline
+% \end{tabular} 
+% }
+% \\
+% The errors are not looking too good.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% P2
@@ -129,109 +164,78 @@ I used my multigrid program from problem 1 to solve the problem
 $$
 \Delta u = -2 \sin(\pi x) \sin(\pi y)
 $$
-on the unit square $(0, 1)\times(0, 1)$ with homogeneous Dirichlet boundary conditions, which has the known solution $u(x,y) = \sin(\pi x) \sin(\pi y)$.
+on the unit square $(0, 1)\times(0, 1)$ with homogeneous Dirichlet boundary conditions, which has the known solution $$u(x,y) = \sin(\pi x) \sin(\pi y).$$
 I performed an analysis of all the different pairings $(\nu_1, \nu_2)$ for grid spacings $h=2^{-5}, 2^{-6}, 2^{-7}$ with stopping criterion relative iterate differences with tolerance $10^{-6}$, and these all achieved relatively similar results. The results do not depend on the grid spacing, as the data will testify. I report the average convergence factors for 1-5 iterations (e.g., $E_3$ is the average convergence factor among 3 iterations, while $E_5$ is the average convergence factor among 5 iterations), and 5 was chosen as the largest $k$ to consider since my lowest reported iteration count for a multigrid solve was 8.  
-The following table is for $h=2^{-5}$, tolerance $10^{-6}$.\\
-\begin{table}
-\centering
-\begin{tabular}{||l|rrrrr|r||}
+The following table is for $h=2^{-5}$, tolerance $10^{-10}$.\\
+\begin{center}
+\begin{tabular}{||c|cccc|c||}
 \hline \hline
-    ($\nu_1, \nu_2$)  &  $E_1$ & $\displaystyle\frac{1}{2} \sum_{i=1}^2 E_i $ &  $\displaystyle\frac{1}{3} \sum_{i=1}^3 E_i $  &  $\displaystyle\frac{1}{4} \sum_{i=1}^4 E_i $  &   $\displaystyle\frac{1}{5} \sum_{i=1}^5 E_i $  &   iterations \\
+ ($\nu_1, \nu_2$)   & $E_1$ & $E_2$ &  $E_3$ & $E_4$ &   iterations \\
 \hline \hline
- (0, 0) & 0.396875   &        0.396875   &       0.454525 &       0.50511  &       0.552891 &           14 \\ \hline
- (0, 1) & 0.305393   &        0.305393   &       0.288137 &       0.318529 &       0.371915 &           23 \\
- (1, 0) & 0.240477   &        0.240477   &       0.244411 &       0.316576 &       0.384936 &           20 \\ \hline
- (1, 1) & 0.0798504  &        0.0798504  &       0.181037 &       0.282042 &       0.360163 &           13 \\
- (0, 2) & 0.179352   &        0.179352   &       0.185095 &       0.262303 &       0.332694 &           16 \\
- (2, 0) & 0.0987041  &        0.0987041  &       0.212508 &       0.311878 &       0.388076 &           13 \\ \hline
- (1, 2) & 0.0556845  &        0.0556845  &       0.166925 &       0.267998 &       0.345461 &           12 \\
- (2, 1) & 0.00870737 &        0.00870737 &       0.164355 &       0.276806 &       0.358282 &           10 \\
- (3, 0) & 0.0844652  &        0.0844652  &       0.218674 &       0.3192   &       0.393989 &           10 \\
- (0, 3) & 0.121375   &        0.121375   &       0.166698 &       0.251102 &       0.322984 &           13 \\ \hline
- (2, 2) & 0.0115739  &        0.0115739  &       0.158641 &       0.267094 &       0.346734 &           10 \\
- (1, 3) & 0.043239   &        0.043239   &       0.158128 &       0.258661 &       0.33563  &           11 \\
- (3, 1) & 0.0376952  &        0.0376952  &       0.186759 &       0.293044 &       0.37053  &            9 \\
- (4, 0) & 0.117969   &        0.117969   &       0.240874 &       0.334553 &       0.405141 &            8 \\
- (0, 4) & 0.0914259  &        0.0914259  &       0.15609  &       0.24315  &       0.315229 &           12 \\ \hline
-\hline
+  \color{red}(0, 1)   &   \color{red}0.305393  &  \color{red}0.301592  &  \color{red}0.297944  &   \color{red}0.291537 &   \color{red}20 \\
+ (1, 0)   &  0.293605  &      0.288987  &      0.291686  &       0.291592 &           24 \\ \hline
+  \color{red}(1, 1)   &   \color{red}0.11991   &  \color{red}0.116894  &  \color{red}0.0975584 &  \color{red}0.156273 &  \color{red}12 \\
+ (0, 2)   &  0.179352  &      0.176355  &      0.1692    &       0.118281 &           14 \\ 
+ (2, 0)   &  0.193867  &      0.186207  &      0.180232  &       0.149008 &           16 \\ \hline
+  \color{red}(1, 2)   &   \color{red}0.0805982 &       \color{red}0.0760598 &      0.0647618 &       0.166059 &    \color{red}10 \\
+  \color{red}(2, 1)   &  0.0809173 &      0.0763635 &       \color{red}0.064411  &        \color{red}0.166031 &   \color{red}10 \\
+ (3, 0)   &  0.140947  &      0.131789  &      0.117586  &       0.162013 &           13 \\
+ (0, 3)   &  0.121375  &      0.117422  &      0.0979251 &       0.156212 &           12 \\ \hline
+  \color{red}(2, 2)   &  0.0606403 &      0.0543182 &  0.0831176 &       0.167628 &  \color{red}9 \\
+  \color{red}(1, 3)   &  \color{red}0.0606286 &  \color{red}0.0543059 &      0.0831232 &       0.167629 &  \color{red}9 \\
+  \color{red}(3, 1)   &  0.0607858 &      0.0544584 &   \color{red}0.0830569 &     \color{red}0.167623 &   \color{red}9 \\
+ (4, 0)   &  0.109314  &      0.100546  &      0.0728343 &       0.166327 &           12 \\
+ (0, 4)   &  0.0914259 &      0.0863728 &      0.0404893 &       0.164779 &           10 \\
+\hline \hline
 \end{tabular}
-\end{table}
+\end{center}
  
-For $h=2^{-6}$, tolerance $10^{-6}$, \\
-\begin{table}
-\centering
-\begin{tabular}{||l|rrrrr|r||}
+For $h=2^{-6}$, tolerance $10^{-10}$,
+\begin{center}
+\begin{tabular}{||c|cccc|c||}
 \hline \hline
-    ($\nu_1, \nu_2$)  &  $E_1$ & $\displaystyle\frac{1}{2} \sum_{i=1}^2 E_i $ &  $\displaystyle\frac{1}{3} \sum_{i=1}^3 E_i $  &  $\displaystyle\frac{1}{4} \sum_{i=1}^4 E_i $  &   $\displaystyle\frac{1}{5} \sum_{i=1}^5 E_i $  &   iterations \\
+ ($\nu_1, \nu_2$)   & $E_1$ & $E_2$ &  $E_3$ & $E_4$ &   iterations \\
 \hline \hline
- (0, 0)   & 0.398287   &     0.398287   &       0.457284 &       0.508628 &       0.552266 &           14 \\ \hline
- (0, 1)   & 0.305759   &     0.305759   &       0.297381 &       0.303017 &       0.34304  &           24 \\
- (1, 0)   & 0.24123    &     0.24123    &       0.221681 &       0.278559 &       0.338408 &           21 \\ \hline
- (1, 1)   & 0.080841   &     0.080841   &       0.152614 &       0.2388   &       0.310719 &           13 \\
- (0, 2)   & 0.180233   &     0.180233   &       0.162842 &       0.224646 &       0.288112 &           16 \\
- (2, 0)   & 0.099502   &     0.099502   &       0.187086 &       0.270098 &       0.339213 &           12 \\ \hline
- (1, 2)   & 0.0568028  &     0.0568028  &       0.140532 &       0.228899 &       0.301117 &           12 \\
- (2, 1)   & 0.00804287 &     0.00804287 &       0.136884 &       0.235023 &       0.310355 &           10 \\
- (3, 0)   & 0.082447   &     0.082447   &       0.18937  &       0.274838 &       0.343387 &            9 \\
- (0, 3)   & 0.122455   &     0.122455   &       0.142858 &       0.213729 &       0.279597 &           14 \\ \hline
- (2, 2)   & 0.0129262  &     0.0129262  &       0.13398  &       0.230136 &       0.304531 &            9 \\
- (1, 3)   & 0.0443836  &     0.0443836  &       0.133365 &       0.22225  &       0.294305 &           11 \\
- (3, 1)   & 0.0363218  &     0.0363218  &       0.158598 &       0.251192 &       0.322932 &            8 \\
- (4, 0)   & 0.115599   &     0.115599   &       0.209191 &       0.288809 &       0.353647 &            8 \\
- (0, 4)   & 0.0926053  &     0.0926053  &       0.131747 &       0.206181 &       0.27286  &           12 \\ \hline
-\hline
+   \color{red}(0, 1)   &    \color{red}0.305759  &   \color{red}0.303893  &   \color{red}0.302047  &   \color{red}0.29956   &   \color{red}20 \\
+ (1, 0)   &  0.294261  &      0.295252  &      0.298011  &      0.300046  &           26 \\ \hline
+   \color{red}(1, 1)   &   \color{red}0.12071   & \color{red}0.119945  & \color{red}0.115927  & \color{red}0.0577091 & \color{red}12 \\
+ (0, 2)   &  0.180233  &      0.179461  &      0.177762  &      0.170408  &           14 \\
+ (2, 0)   &  0.194353  &      0.191018  &      0.188791  &      0.182702  &           17 \\ \hline
+ \color{red}(1, 2)   & \color{red}0.0815659 & \color{red}0.0804702 & \color{red}0.0700874 &      0.111815  & \color{red}10 \\
+ \color{red}(2, 1)   &  0.0818544 &      0.0807546 &      0.070458  & \color{red}0.11171   & \color{red}10 \\
+ (3, 0)   &  0.141378  &      0.137511  &      0.133371  &      0.111955  &           14 \\
+ (0, 3)   &  0.122455  &      0.121482  &      0.117529  &      0.0682134 &           12 \\ \hline
+ \color{red}(2, 2)   &  0.0616633 &      0.0601744 &      0.0327965 &      0.11682   &  \color{red}9 \\
+ \color{red}(1, 3)   &  0.0616527 &      0.0601636 &      0.0327591 &      0.116821  &  \color{red}9 \\
+ \color{red}(3, 1)   &  0.061792  &      0.0603017 &      0.0332196 &      0.116802  &  \color{red}9 \\
+ (4, 0)   &  0.109726  &      0.106782  &      0.100253  &      0.113894  &           13 \\
+ (0, 4)   &  0.0926053 &      0.0913771 &      0.0837286 &      0.106415  &           10 \\
+\hline \hline
 \end{tabular}
-\end{table}
+\end{center}
 
-For $h=2^{-7}$, tolerance $10^{-6}$, \\
-\begin{table}
-\centering
-\begin{tabular}{||l|rrrrr|r||}
+For $h=2^{-7}$, tolerance $10^{-10}$: \\
+\begin{center}
+\begin{tabular}{||c|cccc|c||}
 \hline \hline
-    ($\nu_1, \nu_2$)  &  $E_1$ & $\displaystyle\frac{1}{2} \sum_{i=1}^2 E_i $ &  $\displaystyle\frac{1}{3} \sum_{i=1}^3 E_i $  &  $\displaystyle\frac{1}{4} \sum_{i=1}^4 E_i $  &   $\displaystyle\frac{1}{5} \sum_{i=1}^5 E_i $  &   iterations \\
+ ($\nu_1, \nu_2$)   & $E_1$ & $E_2$ &  $E_3$ & $E_4$ &   iterations \\
 \hline \hline
- (0, 0)   & 0.39859   &      0.39859   &       0.45838  &       0.510181 &       0.553731 &           14 \\ \hline
- (0, 1)   & 0.305848  &      0.305848  &       0.301483 &       0.290371 &       0.316898 &           24 \\
- (1, 0)   & 0.241423  &      0.241423  &       0.22874  &       0.2646   &       0.311    &           20 \\ \hline
- (1, 1)   & 0.0810938 &      0.0810938 &       0.129929 &       0.201638 &       0.265662 &           13 \\
- (0, 2)   & 0.180453  &      0.180453  &       0.171162 &       0.209334 &       0.260305 &           16 \\
- (2, 0)   & 0.0997174 &      0.0997174 &       0.166077 &       0.234016 &       0.294026 &           12 \\ \hline
- (1, 2)   & 0.0570882 &      0.0570882 &       0.118255 &       0.192737 &       0.257747 &           11 \\
- (2, 1)   & 0.0082937 &      0.0082937 &       0.113843 &       0.19745  &       0.265399 &            9 \\
- (3, 0)   & 0.0819103 &      0.0819103 &       0.16469  &       0.234523 &       0.295157 &           10 \\
- (0, 3)   & 0.122724  &      0.122724  &       0.121915 &       0.178623 &       0.237253 &           14 \\ \hline
- (2, 2)   & 0.0132801 &      0.0132801 &       0.112315 &       0.194746 &       0.262212 &            9 \\
- (1, 3)   & 0.0446754 &      0.0446754 &       0.111415 &       0.186938 &       0.252265 &           10 \\
- (3, 1)   & 0.0359415 &      0.0359415 &       0.134041 &       0.212362 &       0.277185 &            8 \\
- (4, 0)   & 0.114961  &      0.114961  &       0.182013 &       0.246734 &       0.304525 &            9 \\
- (0, 4)   & 0.0928997 &      0.0928997 &       0.110056 &       0.171221 &       0.231142 &           12 \\
+ \color{red}(0, 1)   &  0.305848  &      0.304463  &      0.303061  &      0.301479  &  \color{red}21 \\
+ (1, 0)   &  0.294425  &      0.297873  &      0.300711  &      0.302654  &           27 \\ \hline
+ \color{red}(1, 1)   &  0.120909  &      0.120695  &      0.119705  &      0.112979  & \color{red}12 \\
+ (0, 2)   &  0.180453  &      0.180232  &      0.179786  &      0.178067  &           14 \\
+ (2, 0)   &  0.194475  &      0.192975  &      0.192209  &      0.191775  &           18 \\ \hline
+ \color{red}(1, 2)   &  0.0818076 &      0.0815357 &      0.0792587 &      0.0481262 & \color{red}10 \\
+ \color{red}(2, 1)   &  0.0820882 &      0.0818156 &      0.0795544 &      0.0470683 & \color{red}10 \\
+ (3, 0)   &  0.141487  &      0.139291  &      0.13751   &      0.133174  &           15 \\
+ (0, 3)   &  0.122724  &      0.122481  &      0.121534  &      0.115184  &           12 \\ \hline
+ \color{red}(2, 2)   &  0.0619189 &      0.0615518 &      0.0572464 &      0.0771726 & \color{red}9 \\
+ \color{red}(1, 3)   &  0.0619085 &      0.0615412 &      0.057234  &      0.0771781 &  \color{red}9 \\
+ \color{red}(3, 1)   &  0.0620431 &      0.0616766 &      0.0573914 &      0.0771083 &  \color{red}9 \\
+ (4, 0)   &  0.10983   &      0.10803   &      0.10601   &      0.095701  &           13 \\
+ (0, 4)   &  0.0928997 &      0.0925947 &      0.0908535 &      0.0700194 &           10 \\
 \hline \hline
 \end{tabular}
-\end{table}
+\end{center}
 
-Including more average convergence factors for $h=2^{-7}$, tol $10^{-6}$: \\
-\begin{table}
-\centering
-\begin{tabular}{lrrrrrr}
-\hline
- v1, v2   &   ave of 3 &   average of 4 &   average of 5 &   average of 6 &   average of 7 &   iterations \\
-\hline
- (0, 0)   &   0.510181 &       0.553731 &       0.590725 &       0.622112 &       0.648662 &           14 \\
- (0, 1)   &   0.290371 &       0.316898 &       0.352501 &       0.388052 &       0.421029 &           24 \\
- (1, 0)   &   0.2646   &       0.311    &       0.356142 &       0.39694  &       0.432952 &           20 \\
- (1, 1)   &   0.201638 &       0.265662 &       0.32007  &       0.366267 &       0.405829 &           13 \\
- (0, 2)   &   0.209334 &       0.260305 &       0.308686 &       0.351767 &       0.389619 &           16 \\
- (2, 0)   &   0.234016 &       0.294026 &       0.345739 &       0.389893 &       0.427825 &           12 \\
- (1, 2)   &   0.192737 &       0.257747 &       0.31265  &       0.359168 &       0.398994 &           11 \\
- (2, 1)   &   0.19745  &       0.265399 &       0.321472 &       0.368514 &       0.408563 &            9 \\
- (3, 0)   &   0.234523 &       0.295157 &       0.346653 &       0.390554 &       0.428289 &           10 \\
- (0, 3)   &   0.178623 &       0.237253 &       0.28954  &       0.334963 &       0.374407 &           14 \\
- (2, 2)   &   0.194746 &       0.262212 &       0.318064 &       0.365009 &       0.405033 &            9 \\
- (1, 3)   &   0.186938 &       0.252265 &       0.307332 &       0.353987 &       0.393951 &           10 \\
- (3, 1)   &   0.212362 &       0.277185 &       0.331328 &       0.377056 &       0.416145 &            8 \\
- (4, 0)   &   0.246734 &       0.304525 &       0.354362 &       0.397149 &       0.434076 &            9 \\
- (0, 4)   &   0.171221 &       0.231142 &       0.28387  &       0.329496 &       0.369077 &           12 \\
-\hline
-\end{tabular}
-\end{table}
 \end{document}

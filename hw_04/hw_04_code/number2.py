@@ -23,8 +23,10 @@ import tabulate
 import argparse
 from timeit import default_timer as timer 
 from time import clock
+from scipy.stats.mstats import gmean
 
 from multigrid_V_cycle import V_cycle
+from compute_residual import compute_residual, apply_Laplacian
 
 def RHS_function_sampled(h):
 	n = int(1/h)-1
@@ -59,11 +61,11 @@ def main():
 
 	init_error = np.amax(np.abs(u_known-u))
 
-	tol = 10**(-6)
+	tol = 10**(-10)
 
 	step_number=0
 	#smoothing step counts to check over
-	smooth_steps = [(0,0),(0,1), (1, 0), (1, 1), (0,2), (2,0), (1,2), (2, 1), (3,0), (0,3), (2, 2), (1, 3), (3,1), (4,0), (0,4)]
+	smooth_steps = [(0,1), (1, 0), (1, 1), (0,2), (2,0), (1,2), (2, 1), (3,0), (0,3), (2, 2), (1, 3), (3,1), (4,0), (0,4)]
 	conv_Factor = np.zeros((15,8))
 	itcounts = np.zeros(15)
 
@@ -78,24 +80,24 @@ def main():
 			itcount += 1
 			#use a V-cycle iteration with smoothing steps as given
 			u = V_cycle(u_old, f, h, step[0], step[1])
+			res = compute_residual(u, f, h)
 
 			#calculate convergence factor
 			error_k = np.amax(np.abs(u_known-u))
 			errors.append(error_k)
 
 			#stop when iterate differences within relative tol
-			if np.amax(np.abs(u-u_old)) < tol*np.amax(np.abs(u_old)):
+			if np.amax(np.abs(res)) < tol*np.amax(np.abs(f)):
 				break
 
 		toc = clock()
 		print toc-tic
 
 		#compute convergence factors
-		conv_factors = [(errors[k]/errors[0])**(1/k) for k in range(1,8)]
+		conv_factors = [(errors[k]/errors[0])**(1/k) for k in range(1,5)]
 		#save data for table
-		conv_Factor[step_number][0] = conv_factors[0]
-		for i in range(1,8):
-			conv_Factor[step_number][i] = np.average(conv_factors[:i])
+		for i in range(4):
+			conv_Factor[step_number][i] = conv_factors[i]
 		itcounts[step_number] = itcount
 
 		step_number+=1
@@ -103,8 +105,10 @@ def main():
 		print errors[itcount]
 
 	#create table of output data
-	smoothing_table = [[smooth_steps[i], conv_Factor[i][2],conv_Factor[i][3],conv_Factor[i][4],conv_Factor[i][5],conv_Factor[i][6], itcounts[i]] for i in range(15)]
-	print tabulate.tabulate(smoothing_table, headers = ["v1, v2", "ave of 3", "average of 4", "average of 5", "average of 6", "average of 7", "iterations"], tablefmt="latex")
+	print "h = ", h
+	print "tol =", tol
+	smoothing_table = [[smooth_steps[i], conv_Factor[i][0],conv_Factor[i][1],conv_Factor[i][2],conv_Factor[i][3], itcounts[i]] for i in range(14)]
+	print tabulate.tabulate(smoothing_table, headers = ["v1, v2", "ave of 1", "average of 2", "average of 3", "average of 4", "iterations"], tablefmt="latex")
 
 
 

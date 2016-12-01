@@ -27,34 +27,38 @@ from direct_solve import trivial_direct_solve
 	
 def V_cycle(u, f, h, v1, v2):
 	#presmooth v1 times
-	tic = clock()
+	# res_old = compute_residual(u, f, h)
 	u = GS_RB_smoother(u,f, h, v1)
-	toc = clock()
-	print 'smooth time at h=', h, toc-tic
-
 	#compute residual
+	# print 'computing residual at level h=', h
 	res = compute_residual(u, f, h)
+	# print " h= ", h
+	# print "PRE-OLD: ", np.amax(np.abs(res_old))
+	# print "PRE-NEW: ", np.amax(np.abs(res))
+	# print "ratio = ", np.amax(np.abs(res))/np.amax(np.abs(res_old))
 	
 	#restrict residual
 	res2 = full_weighting_restriction(res, h)
-	
+
 	#solve for coarse grid error, check grid level to decide whether to solve or be recursive
 	if h == 2**(-2):
 		error = trivial_direct_solve(res2, 2*h)
 	else:
-		error = np.zeros((int(1/(2*h)+1), int(1/(2*h)+1)))
+		error = np.zeros((int(1/(2*h)+1), int(1/(2*h)+1)), dtype=float)
 		error = V_cycle(error, res2, 2*h, v1, v2)	
 
 	#interpolate error
-	tic=clock()
 	error2 = bilinear_interpolation(error, 2*h)
-	toc = clock()
-	print 'interpol time at h=', h, toc-tic
+
 	#correct (add error back in)
 	u = u+error2
 
 	#post-smooth v2 times
-	return GS_RB_smoother(u, f, h, v2)
+	# print "h= ", h
+	# print "POST-OLD: ", np.amax(np.abs(compute_residual(u,f,h)))
+	u = GS_RB_smoother(u, f, h, v2)
+	# print "POST-NEW: ", np.amax(np.abs(compute_residual(u,f,h)))
+	return u
 
 # def main():
 # 	h = 2**(-8)

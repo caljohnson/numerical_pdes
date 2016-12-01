@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1478923459 "hw_03_228A.tex" "hw_03_228A.pdf" "hw_03_228A" 1478923462
+["pdflatex"] 1478923459 "hw_03_228A.tex" "hw_03_228A.pdf" "hw_03_228A" 1480368907
   "/usr/local/texlive/2016/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2016/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2016/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1246382020 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -217,9 +217,9 @@
   "/usr/local/texlive/2016/texmf.cnf" 1463979140 577 2938757e76f31531e65cc647e3507693 ""
   "hw_03_228A.aux" 1478923461 820 216720548cc94a3cd20e55599f446dbd ""
   "hw_03_228A.out" 1478923461 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "hw_03_228A.tex" 1478923457 24075 78226c133023cc2b874d7d6d072473c7 ""
+  "hw_03_228A.tex" 1480368906 24075 78226c133023cc2b874d7d6d072473c7 ""
   (generated)
+  "hw_03_228A.aux"
+  "hw_03_228A.out"
   "hw_03_228A.pdf"
   "hw_03_228A.log"
-  "hw_03_228A.out"
-  "hw_03_228A.aux"

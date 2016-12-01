@@ -16,7 +16,7 @@ def bilinear_interpolation(u_c, h):
 	n = int(1/h)-1
 	h2 = h/2
 	n2 = int(1/h2)-1
-	u_f = np.zeros((n2+2, n2+2))
+	u_f = np.zeros((n2+2, n2+2),dtype=float)
 
 	#loop over coarse mesh, holding boundary entries zero as per Dirichlet BC
 	for i in range(1,n+1):
@@ -33,5 +33,5 @@ def bilinear_interpolation(u_c, h):
 			u_f[2*i+1][2*j-1] += u_c[i][j]/4
 			u_f[2*i-1][2*j+1] += u_c[i][j]/4
 			u_f[2*i-1][2*j-1] += u_c[i][j]/4
-			
+		
 	return u_f
