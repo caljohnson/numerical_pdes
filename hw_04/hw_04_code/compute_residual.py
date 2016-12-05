@@ -15,15 +15,6 @@ from math import exp, sin, pi
 import scipy.sparse as sparse
 import scipy.sparse.linalg
 
-def make_sparse_Laplacian(h):
-	#set sparse matrix A, the discrete Laplacian
-	N = int(1/h) -1
-	offdiag = (1.0/(h**2))*np.ones(N**2)
-	diag = np.ones(N**2)*(-4.0/(h**2))
-	data = np.vstack((offdiag, offdiag, diag, offdiag, offdiag))
-	A = sparse.dia_matrix((data, [-N,-1, 0,1,N]), shape = (N**2,N**2))
-	return scipy.sparse.csr_matrix(A)
-
 def apply_Laplacian(u, h, A):
 	#remove Dirichlet BC's from u to work with Au
 	#and flatten the matrix into a vector for Au multiplication

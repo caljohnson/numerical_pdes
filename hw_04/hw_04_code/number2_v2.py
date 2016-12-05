@@ -26,7 +26,7 @@ from time import clock
 from scipy.stats.mstats import gmean
 
 from multigrid_V_cycle import V_cycle
-from compute_residual import compute_residual, apply_Laplacian_nomatrix
+from compute_residual import compute_residual, get_Laplacian, apply_Laplacian
 
 def RHS_function_sampled(h):
 	n = int(1/h)-1
@@ -54,7 +54,7 @@ def known_solution(h):
 
 def main():
 	#test problem grid spacing size
-	h= 2**(-5)
+	h= 2**(-7)
 	n = int(1/h - 1)
 
 	#initialize 0th iterate u
@@ -63,8 +63,13 @@ def main():
 	#compute a known solution
 	SOL = known_solution(h)
 
+	#make sparse Laplacians for later computation
+	Laplacians = []
+	for i in range(2,10):
+		Laplacians.append(get_Laplacian(2**(-i)))
+
 	#generate a RHS that SOL is the solution to the algebraic eqn Lu = f
-	f = apply_Laplacian_nomatrix(SOL,h)
+	f = apply_Laplacian(SOL,h, Laplacians[int(-2-np.log2(h))])
 
 	#initialize the error vector between our known solution SOL and 0th iterate u
 	init_error = np.amax(np.abs(SOL-u))
@@ -77,6 +82,7 @@ def main():
 	step_number=0
 	conv_Factor = np.zeros((15,8))
 	itcounts = np.zeros(15)
+	times = np.zeros(15)
 
 	for step in tqdm(smooth_steps):
 		errors = [init_error]
@@ -88,8 +94,8 @@ def main():
 			u_old = u+0
 			itcount += 1
 			#use a V-cycle iteration with smoothing steps as given
-			u = V_cycle(u_old, f, h, step[0], step[1])
-			res = compute_residual(u, f, h)
+			u = V_cycle(u_old, f, h, step[0], step[1], Laplacians)
+			res = compute_residual(u, f, h, Laplacians[int(-2-np.log2(h))])
 
 			#calculate convergence factor
 			error_k = np.amax(np.abs(SOL-u))
@@ -102,22 +108,24 @@ def main():
 		toc = clock()
 		print toc-tic
 
+
 		#compute convergence factors
-		conv_factors = [(errors[k]/errors[0])**(1/k) for k in range(1,5)]
+		conv_factors = [(errors[k]/errors[0])**(1/k) for k in range(1,6)]
 		#save data for table
-		for i in range(4):
+		for i in range(5):
 			conv_Factor[step_number][i] = conv_factors[i]
 		itcounts[step_number] = itcount
+		times[step_number]=toc-tic
 
 		step_number+=1
 
-		print errors[itcount]
+		# print errors[itcount]
 
 	#create table of output data
 	print "h = ", h
 	print "tol =", tol
-	smoothing_table = [[smooth_steps[i], conv_Factor[i][0],conv_Factor[i][1],conv_Factor[i][2],conv_Factor[i][3], itcounts[i]] for i in range(14)]
-	print tabulate.tabulate(smoothing_table, headers = ["v1, v2", "ave of 1", "average of 2", "average of 3", "average of 4", "iterations"], tablefmt="latex")
+	smoothing_table = [[smooth_steps[i], conv_Factor[i][0],conv_Factor[i][1],conv_Factor[i][2],conv_Factor[i][3], conv_Factor[i][4], itcounts[i], times[i]] for i in range(14)]
+	print tabulate.tabulate(smoothing_table, headers = ["v1, v2", "ave of 1", "average of 2", "average of 3", "average of 4", "average of 5", "iterations", "run times"], tablefmt="latex")
 
 
 

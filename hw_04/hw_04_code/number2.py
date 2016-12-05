@@ -64,7 +64,7 @@ def main():
 	for i in range(2,10):
 		Laplacians.append(get_Laplacian(2**(-i)))
 
-	tol = 10**(-10)
+	tol = 10**(-7)
 
 	step_number=0
 	#smoothing step counts to check over
@@ -86,9 +86,8 @@ def main():
 			u = V_cycle(u_old, f, h, step[0], step[1], Laplacians)
 			res = compute_residual(u, f, h, Laplacians[int(-2-np.log2(h))])
 
-			#calculate convergence factor
-			error_k = np.amax(np.abs(u_known-u))
-			errors.append(error_k)
+			#add error at this iterate to list of errors
+			errors.append(np.amax(np.abs(u_known-u)))
 
 			#stop when iterate differences within relative tol
 			if np.amax(np.abs(res)) < tol*np.amax(np.abs(f)):
@@ -98,9 +97,9 @@ def main():
 		# print toc-tic
 
 		#compute convergence factors
-		conv_factors = [(errors[k]/errors[0])**(1/k) for k in range(1,5)]
+		conv_factors = [(errors[k]/errors[0])**(1/k) for k in range(1,6)]
 		#save data for table
-		for i in range(4):
+		for i in range(5):
 			conv_Factor[step_number][i] = conv_factors[i]
 		itcounts[step_number] = itcount
 		times[step_number]=toc-tic
@@ -112,8 +111,8 @@ def main():
 	#create table of output data
 	print "h = ", h
 	print "tol =", tol
-	smoothing_table = [[smooth_steps[i], conv_Factor[i][0],conv_Factor[i][1],conv_Factor[i][2],conv_Factor[i][3], itcounts[i], times[i]] for i in range(14)]
-	print tabulate.tabulate(smoothing_table, headers = ["v1, v2", "ave of 1", "average of 2", "average of 3", "average of 4", "iterations", "run times"], tablefmt="latex")
+	smoothing_table = [[smooth_steps[i], conv_Factor[i][0],conv_Factor[i][1],conv_Factor[i][2],conv_Factor[i][3], conv_Factor[i][4], itcounts[i], times[i]] for i in range(14)]
+	print tabulate.tabulate(smoothing_table, headers = ["v1, v2", "ave of 1", "average of 2", "average of 3", "average of 4", "average of 5", "iterations", "run times"], tablefmt="latex")
 
 
 

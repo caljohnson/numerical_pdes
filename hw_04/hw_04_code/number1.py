@@ -80,7 +80,7 @@ def main():
 	args = PARSE_ARGS()
 
 	#set tolerance for stopping criterion
-	tol = 10**(-10)
+	tol = 10**(-6)
 
 	#in case we're running the multigrid code test on known problem
 	if args.test:
@@ -101,10 +101,9 @@ def main():
 			SOL = np.random.rand(n,n)
 			SOL = np.pad(SOL, ((1,1),(1,1)), mode='constant')
 			f = apply_Laplacian_nomatrix(SOL,h, Laplacians[int(-2-np.log2(h))])
-
 		#if not in test, set RHS as in problem statement
 		else:
-			f = RHS_function_sampled(h)	
+			f = RHS_function_sampled(h)
 
 		#use multigrid algorithm
 		itcount = 0
@@ -112,7 +111,7 @@ def main():
 			itcount += 1
 			print itcount
 			#use a V-cycle iteration
-			u=V_cycle(u, f, h, 2,1, Laplacians)
+			u=V_cycle(u, f, h, 2,2, Laplacians)
 
 			#compute residual of solution
 			res = compute_residual(u, f, h, Laplacians[int(-2-np.log2(h))])
