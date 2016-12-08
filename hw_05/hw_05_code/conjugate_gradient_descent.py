@@ -43,39 +43,13 @@ def exact_solve_preconditioner(r,h,L):
 	z = linalg.spsolve(L,R).reshape(N,N)
 	return np.pad(z, ((1,1),(1,1)), mode='constant')
 
-def known_solution(h):
-	n = int(1/h)-1
-	u = np.zeros((n+2,n+2))
-
-	for i in range(1,n+1):
-		for j in range(1,n+1):
-			u[i][j] = sin(pi*i*h)*sin(pi*j*h)
-	return u
-
-def conjugate_gradient_descent(power, shampoo, tol, max_iterations):
+def conjugate_gradient_descent(power, shampoo, tol, max_iterations, A, Laplacians, f):
 	#set grid size h and grid points N
 	h = 2**(-power)
 	n = int(1/h) -1
 
-	#make sparse Laplacians for later computation
-	Laplacians = []
-	for i in range(2,11):
-		Laplacians.append(get_Laplacian(2**(-i)))
-
-	#get correct Laplacian
-	A = Laplacians[int(-2-np.log2(h))]
-
-	#set "known" solution u
-	# np.random.seed(1)
-	# u_sol = np.pad(np.random.rand(n,n), ((1,1),(1,1)), mode='constant')
-	u_sol = known_solution(h)
-
-	#compute RHS f=Au
-	f = apply_Laplacian(u_sol,h,A)
-
 	#initial guess
 	u = np.zeros((n+2,n+2))
-	# u = copy.deepcopy(u_sol)/2
 
 	#initialize residual
 	r = f - apply_Laplacian(u,h,A)
@@ -136,7 +110,7 @@ def conjugate_gradient_descent(power, shampoo, tol, max_iterations):
 	if k == max_iterations-1:
 		print "max iterations exceeded"
 
-	return u			
+	return u, k+1			
 
 def PARSE_ARGS():
 	parser = ArgumentParser()
@@ -148,7 +122,19 @@ def PARSE_ARGS():
 
 def main():
 	ARGS = PARSE_ARGS()
-	u = conjugate_gradient_descent(ARGS.power,ARGS.shampoo,ARGS.tol,ARGS.max_iterations)
+	#make sparse Laplacians for later computation
+	Laplacians = []
+	for i in range(2,ARGS.power+1):
+		Laplacians.append(get_Laplacian(2**(-i)))
+	
+	#set "known" solution u
+	u_sol = known_solution(h)
+
+	#compute RHS f=Au
+	A = Laplacians[int(-2-np.log2(h))]
+	f = apply_Laplacian(u_sol,h,A)
+
+	u = conjugate_gradient_descent(ARGS.power,ARGS.shampoo,ARGS.tol,ARGS.max_iterations, A, Laplacians, RHS)
 	return
 
 if __name__ == "__main__":
