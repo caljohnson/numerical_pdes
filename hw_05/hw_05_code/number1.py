@@ -21,11 +21,11 @@ def PARSE_ARGS():
 	parser = ArgumentParser()
 	parser.add_argument("-p", "--power", type=int, default=7, dest="power")
 	parser.add_argument("-s", "--shampoo", type=int, default=1, dest="shampoo")
-	parser.add_argument("-m", "--maxits", type=int, default=1000, dest="max_iterations")
+	parser.add_argument("-m", "--maxits", type=int, default=2000, dest="max_iterations")
 	parser.add_argument("-t", "--tol", type=float, default=1e-7, dest="tol")
 	return parser.parse_args()	
 
-def known_solution(h):
+def RHS(h):
 	n = int(1/h)-1
 	u = np.zeros((n+2,n+2))
 
@@ -43,21 +43,19 @@ def main():
 	for i in range(2,10):
 		Laplacians.append(get_Laplacian(2**(-i)))
 
-	grid_spacings = [2**(-5), 2**(-6), 2**(-7), 2**(-8), 2**(-9)]
+	grid_spacings = [2**(-4), 2**(-5), 2**(-6), 2**(-7), 2**(-8)]
 	itcounts = []
 	times = [] 
 	
 	for h in grid_spacings:
+		print "h = ", h
 		#compute grid point number n and power
 		n = int(1/h) -1
 		power = -np.log2(h)
 
-		#set "known" solution u
-		u_sol = known_solution(h)
-
-		#compute RHS f=Au
+		#compute RHS to f=Au
 		A = Laplacians[int(-2-np.log2(h))]
-		f = apply_Laplacian(u_sol,h,A)	
+		f = RHS(h)
 		
 		#use CGD or PCG algorithm
 		toc = clock()
@@ -67,6 +65,12 @@ def main():
 		itcounts.append(iterations)
 
 	test_table = [[grid_spacings[i], itcounts[i], times[i]] for i in range(np.size(grid_spacings)) ]
+	if ARGS.shampoo == 1:
+		print "CG with no pre-conditioning"
+	if ARGS.shampoo == 2:
+		print "PCG with SSOR"
+	if ARGS.shampoo == 3:
+		print "PCG with MG"	
 	print tabulate.tabulate(test_table, headers = ["grid spacing h", "iteration count", "run time (seconds)"], tablefmt="latex")
 
 

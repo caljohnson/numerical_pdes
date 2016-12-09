@@ -65,7 +65,7 @@ def PARSE_ARGS():
 
 def main():
 	#create grid spacings data
-	grid_spacings = [2**(-5), 2**(-6), 2**(-7), 2**(-8), 2**(-9)]
+	grid_spacings = [2**(-4), 2**(-5), 2**(-6), 2**(-7), 2**(-8)]
 
 	#make sparse Laplacians for later computation
 	Laplacians = []
@@ -80,7 +80,7 @@ def main():
 	args = PARSE_ARGS()
 
 	#set tolerance for stopping criterion
-	tol = 10**(-6)
+	tol = 10**(-7)
 
 	#in case we're running the multigrid code test on known problem
 	if args.test:
@@ -111,7 +111,7 @@ def main():
 			itcount += 1
 			print itcount
 			#use a V-cycle iteration
-			u=V_cycle(u, f, h, 2,2, Laplacians)
+			u=V_cycle(u, f, h, 1,1, Laplacians)
 
 			#compute residual of solution
 			res = compute_residual(u, f, h, Laplacians[int(-2-np.log2(h))])

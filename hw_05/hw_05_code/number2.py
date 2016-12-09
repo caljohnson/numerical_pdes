@@ -11,6 +11,8 @@
 #on your results
 from argparse import ArgumentParser
 import numpy as np
+from time import clock
+import tabulate
 
 from conjugate_gradient_descent import conjugate_gradient_descent as cgd
 from make_matrix_rhs_circleproblem import make_matrix_rhs_circleproblem as mmrc
@@ -21,27 +23,49 @@ def PARSE_ARGS():
 	parser = ArgumentParser()
 	parser.add_argument("-p", "--power", type=int, default=7, dest="power")
 	parser.add_argument("-s", "--shampoo", type=int, default=1, dest="shampoo")
-	parser.add_argument("-m", "--maxits", type=int, default=1000, dest="max_iterations")
+	parser.add_argument("-m", "--maxits", type=int, default=2000, dest="max_iterations")
 	parser.add_argument("-t", "--tol", type=float, default=1e-7, dest="tol")
 	return parser.parse_args()	
 
 def main():
 	ARGS = PARSE_ARGS()
-	#make special Laplacian and RHS for problem
-	h = 2**(-ARGS.power)
-	[A, f, phi] = mmrc(h)
 
 	#make Laplacians for V cycle
 	Laplacians = []
-	for i in range(2,ARGS.power+1):
+	for i in range(2,10):
 		Laplacians.append(get_Laplacian(2**(-i)))
 
-	n = int(1/(2**(-ARGS.power)))-1
-	f = f.reshape(n, n)
-	f = np.pad(f, ((1,1),(1,1)), mode='constant')
+	grid_spacings = [2**(-4), 2**(-5), 2**(-6), 2**(-7), 2**(-8)]
+	itcounts = []
+	times = [] 
+	
+	for h in grid_spacings:
+		print "h = ", h
+		#compute grid point number n and power
+		n = int(1/h) -1
+		power = -np.log2(h)
 
+		#compute RHS to f=Au on special domain
+		[A, f, phi] = mmrc(h)
+		f = f.reshape(n, n)
+		f = np.pad(f, ((1,1),(1,1)), mode='constant')
+		
+		#use CGD or PCG algorithm
+		toc = clock()
+		[u,iterations] = cgd(power, ARGS.shampoo, ARGS.tol, ARGS.max_iterations, A, Laplacians, f)
+		tic = clock()
+		times.append(tic-toc)
+		itcounts.append(iterations)
 
-	u = cgd(ARGS.power, ARGS.shampoo, ARGS.tol, ARGS.max_iterations, A, Laplacians, f)
+	test_table = [[grid_spacings[i], itcounts[i], times[i]] for i in range(np.size(grid_spacings)) ]
+	if ARGS.shampoo == 1:
+		print "CG with no pre-conditioning"
+	if ARGS.shampoo == 2:
+		print "PCG with SSOR"
+	if ARGS.shampoo == 3:
+		print "PCG with MG"	
+	print tabulate.tabulate(test_table, headers = ["grid spacing h", "iteration count", "run time (seconds)"], tablefmt="latex")
+
 
 
 
