@@ -1,9 +1,11 @@
-#MAT228A HW 4
+#MAT228A HW 5
 #Multigrid V-Cycle Solver
 
 #Multigrid V-cycle with
 #full-weighting, bilinear interpol, GS-RB smoothing
 #for Poission equation with Dirichlet BCs 
+
+#adapted for use in homework 5
 
 
 from __future__ import division
@@ -11,7 +13,7 @@ from __future__ import division
 import numpy as np
 from math import exp, sin, pi
 
-from GS_RB_smoother import GS_RB_smoother, GS_RBBR_smoother
+from GS_RB_smoother import GS_RB_BR_smoother
 from full_weighting_restriction import full_weighting_restriction
 from bilinear_interpolation import bilinear_interpolation
 from compute_residual import compute_residual
@@ -19,11 +21,11 @@ from direct_solve import trivial_direct_solve
 	
 def V_cycle(u, f, h, v1, v2, Laplacians):
 	#presmooth v1 times
-	u = GS_RBBR_smoother(u,f, h, v1)
+	u = GS_RB_BR_smoother(u,f, h, v1)
 
 	#access correct Laplacian
 	L = Laplacians[int(-2-np.log2(h))]
-
+	
 	#compute residual
 	res = compute_residual(u, f, h, L)
 
@@ -44,6 +46,6 @@ def V_cycle(u, f, h, v1, v2, Laplacians):
 	u = u+error2
 
 	#post-smooth v2 times
-	u = GS_RBBR_smoother(u, f, h, v2)
+	u = GS_RB_BR_smoother(u, f, h, v2)
 
 	return u

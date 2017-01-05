@@ -40,7 +40,7 @@ def GS_RB_smoother(u, f, h, steps):
 
 	return u
 
-def GS_RBBR_smoother(u, f, h, steps):
+def GS_RB_BR_smoother(u, f, h, steps):
 
 	#set number of grid points in each row/column
 	n = int(1/h - 1)
@@ -68,6 +68,7 @@ def GS_RBBR_smoother(u, f, h, steps):
 			# print "black", i,j
 			u[i][j] = (1/4)*(u[i-1][j]+u[i][j-1]+u[i+1][j] + u[i][j+1] - (h**2)*f[i][j])
 
+
 		#loop black 
 		for (i,j) in blacks:
 			# print "black", i,j
@@ -78,4 +79,5 @@ def GS_RBBR_smoother(u, f, h, steps):
 			# print "red", i,j
 			u[i][j] = (1/4)*(u[i-1][j]+u[i][j-1]+u[i+1][j] + u[i][j+1] - (h**2)*f[i][j])
 		
-	return u	
+
+	return u

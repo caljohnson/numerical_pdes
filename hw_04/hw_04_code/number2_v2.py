@@ -16,15 +16,17 @@ import numpy as np
 from math import exp, sin, pi
 
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 import scipy.sparse as sparse
 import scipy.sparse.linalg
 import tabulate
 import argparse
+from timeit import default_timer as timer 
 from time import clock
 from scipy.stats.mstats import gmean
 
 from multigrid_V_cycle import V_cycle
-from compute_residual import compute_residual, apply_Laplacian, get_Laplacian
+from compute_residual import compute_residual, get_Laplacian, apply_Laplacian
 
 def RHS_function_sampled(h):
 	n = int(1/h)-1
@@ -51,24 +53,33 @@ def known_solution(h):
 	return u
 
 def main():
-	h= 2**(-6)
+	#test problem grid spacing size
+	h= 2**(-7)
 	n = int(1/h - 1)
-	u = np.zeros((n+2,n+2))
-	f = RHS_function_sampled(h)
-	u_known = known_solution(h)
 
-	init_error = np.amax(np.abs(u_known-u))
+	#initialize 0th iterate u
+	u = np.zeros((n+2,n+2))
+
+	#compute a known solution
+	SOL = known_solution(h)
 
 	#make sparse Laplacians for later computation
 	Laplacians = []
 	for i in range(2,10):
 		Laplacians.append(get_Laplacian(2**(-i)))
 
-	tol = 10**(-7)
+	#generate a RHS that SOL is the solution to the algebraic eqn Lu = f
+	f = apply_Laplacian(SOL,h, Laplacians[int(-2-np.log2(h))])
 
-	step_number=0
+	#initialize the error vector between our known solution SOL and 0th iterate u
+	init_error = np.amax(np.abs(SOL-u))
+
+	#tolerance for stopping criterion
+	tol = 10**(-10)
+
 	#smoothing step counts to check over
 	smooth_steps = [(0,1), (1, 0), (1, 1), (0,2), (2,0), (1,2), (2, 1), (3,0), (0,3), (2, 2), (1, 3), (3,1), (4,0), (0,4)]
+	step_number=0
 	conv_Factor = np.zeros((15,8))
 	itcounts = np.zeros(15)
 	times = np.zeros(15)
@@ -86,15 +97,17 @@ def main():
 			u = V_cycle(u_old, f, h, step[0], step[1], Laplacians)
 			res = compute_residual(u, f, h, Laplacians[int(-2-np.log2(h))])
 
-			#add error at this iterate to list of errors
-			errors.append(np.amax(np.abs(u_known-u)))
+			#calculate convergence factor
+			error_k = np.amax(np.abs(SOL-u))
+			errors.append(error_k)
 
 			#stop when iterate differences within relative tol
 			if np.amax(np.abs(res)) < tol*np.amax(np.abs(f)):
 				break
 
 		toc = clock()
-		# print toc-tic
+		print toc-tic
+
 
 		#compute convergence factors
 		conv_factors = [(errors[k]/errors[0])**(1/k) for k in range(1,6)]
